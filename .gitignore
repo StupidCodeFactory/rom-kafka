@@ -7,3 +7,5 @@ doc/
 log/
 pkg/
 tmp/
+.byebug_history
+.env

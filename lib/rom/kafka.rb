@@ -1,7 +1,7 @@
-require "attributes_dsl"
-require "poseidon"
+require "ruby-kafka"
 require "rom"
-
+require "rom-sql"
+require 'byebug'
 # Ruby Object Mapper
 #
 # @see http://rom-rb.org/
@@ -12,13 +12,13 @@ module ROM
   # @see http://kafka.apache.org/
   #
   module Kafka
-    require_relative "kafka/brokers"
-    require_relative "kafka/connection"
     require_relative "kafka/dataset"
     require_relative "kafka/gateway"
+    require_relative "kafka/commands/create"
     require_relative "kafka/relation"
-    require_relative "kafka/create"
   end
 
-  register_adapter(:kafka, Kafka)
+
 end
+
+ROM.register_adapter(:kafka, ROM::Kafka)

@@ -5,100 +5,30 @@ describe ROM::Kafka::Dataset do
   let(:consumer)       { double :consumer }
   before { allow(consumer_class).to receive(:new) { consumer } }
 
-  let(:dataset) { described_class.new(gateway, topic.to_sym) }
-  let(:gateway) { gateway_class.new client_id: "foo" }
+  let(:kafka) { Kafka.new(['kafka:9092']) }
   let(:topic)   { "bar" }
-
-  describe "#gateway" do
-    subject { dataset.gateway }
-
-    it "is initialized" do
-      expect(subject).to eql gateway
-    end
-  end
+  let(:options) { {} }
+  subject { described_class.new(kafka, topic, options) }
 
   describe "#topic" do
-    subject { dataset.topic }
 
     it "is initialized" do
-      expect(subject).to eql topic
-    end
-  end
-
-  describe "#attributes" do
-    subject { dataset.attributes }
-
-    context "by default" do
-      let(:attributes) do
-        {
-          partition: 0,
-          offset: 0,
-          limit: 0,
-          min_bytes: gateway.min_bytes,
-          max_bytes: gateway.max_bytes,
-          max_wait_ms: gateway.max_wait_ms
-        }
-      end
-
-      it "is taken from a gateway" do
-        expect(subject).to eql attributes
-      end
-    end
-
-    context "when options are set" do
-      let(:dataset) { described_class.new(gateway, topic, attributes) }
-      let(:attributes) do
-        {
-          partition: 1,
-          offset: 2,
-          limit: 10,
-          min_bytes: 1_024,
-          max_bytes: 10_240,
-          max_wait_ms: 100
-        }
-      end
-
-      it "is initialized" do
-        expect(subject).to eql attributes
-      end
+      expect(subject.topic).to eq topic
     end
   end
 
   describe "#producer" do
-    subject { dataset.producer }
 
-    it "is taken from #gateway" do
-      expect(subject).to eql gateway.producer
+    it "exists" do
+      expect(kafka).to receive(:producer)
+      subject.producer
     end
   end
 
   describe "#consumer" do
-    subject { dataset.consumer }
-
-    let(:dataset) { described_class.new(gateway, topic, attributes) }
-
-    let(:attributes) do
-      {
-        partition: 1,
-        offset: 2,
-        limit: 0,
-        min_bytes: 1_024,
-        max_bytes: 10_240,
-        max_wait_ms: 100
-      }
-    end
-
-    let(:options) do
-      attributes.merge(
-        topic: topic,
-        client_id: gateway.client_id,
-        brokers: gateway.brokers
-      )
-    end
-
     it "is initialized with proper options" do
-      expect(consumer_class).to receive(:new).with(options)
-      expect(subject).to eql consumer
+      expect(kafka).to receive(:consumer)
+      subject.consumer
     end
   end
 
@@ -122,41 +52,6 @@ describe ROM::Kafka::Dataset do
 
     it "updates attributes" do
       expect(subject.attributes).to eql(dataset.attributes.merge(update))
-    end
-  end
-
-  describe "#each" do
-    subject { dataset.to_a }
-
-    let(:consumer) { double :consumer, each: data.each }
-    let(:data)     { %w(foo bar baz qux) }
-
-    context "when limit isn't set" do
-      it "is delegated to the consumer" do
-        expect(subject).to eql data
-      end
-
-      it "yields limited number of times" do
-        expect { |b| dataset.each(&b) }.to yield_control.exactly(4).times
-      end
-    end
-
-    context "when limit is set" do
-      let(:dataset) { described_class.new(gateway, topic, limit: 2) }
-
-      it "is delegated to the consumer" do
-        expect(subject).to eql data[0..1]
-      end
-
-      it "yields limited number of times" do
-        expect { |b| dataset.each(&b) }.to yield_control.twice
-      end
-    end
-
-    context "without a block" do
-      subject { dataset.each }
-
-      it { is_expected.to be_kind_of Enumerator }
     end
   end
 end

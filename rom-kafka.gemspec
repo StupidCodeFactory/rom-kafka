@@ -1,6 +1,6 @@
 Gem::Specification.new do |gem|
   gem.name             = "rom-kafka"
-  gem.version          = "0.0.3"
+  gem.version          = "0.1.0"
   gem.author           = ["Andrew Kozin"]
   gem.email            = ["andrew.kozin@gmail.com"]
   gem.summary          = "Kafka support for Ruby Object Mapper"
@@ -14,13 +14,13 @@ Gem::Specification.new do |gem|
   gem.extra_rdoc_files = Dir["README.md", "LICENSE", "CHANGELOG.md"]
   gem.require_paths    = ["lib"]
 
-  gem.required_ruby_version = ">= 1.9.3"
+  gem.add_runtime_dependency "rom", "~> 4.2.1"
+  gem.add_runtime_dependency "ruby-kafka", "~> 0.6.8"
+  gem.add_runtime_dependency "concurrent-ruby", "~> 1.0.5"
 
-  gem.add_runtime_dependency "rom", "~> 2.0"
-  gem.add_runtime_dependency "poseidon", "~> 0.0.5"
-  gem.add_runtime_dependency "attributes_dsl", "~> 0.1.0", ">= 0.1.1"
-
-  gem.add_development_dependency "hexx-rspec", "~> 0.5"
-  gem.add_development_dependency "inflecto", "~> 0.0", ">= 0.0.2"
-  gem.add_development_dependency "timecop", "~> 0.8"
+  gem.add_development_dependency "dry-inflector", "~> 0.1.2"
+  gem.add_development_dependency "timecop", "~> 0.9.1"
+  gem.add_development_dependency "rspec", "~> 3.8.0"
+  gem.add_development_dependency "byebug", "~> 10.0.2"
+  gem.add_runtime_dependency     "rom-sql"
 end

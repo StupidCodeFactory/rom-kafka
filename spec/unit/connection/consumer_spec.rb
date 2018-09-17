@@ -4,12 +4,11 @@ describe ROM::Kafka::Connection::Consumer do
   # We test not the poseidon API, but its proper usage by the Consumer.
   # That's why we stub poseidon classes.
   # ----------------------------------------------------------------------------
-  let(:driver)     { Poseidon::PartitionConsumer }
+  let(:driver)     { Kafka.new }
   let(:connection) { double :connection }
   before { allow(driver).to receive(:consumer_for_partition) { connection } }
   # ============================================================================
 
-  let(:consumer) { described_class.new options }
   let(:options) do
     attributes.merge(
       client_id: client,
@@ -28,9 +27,9 @@ describe ROM::Kafka::Connection::Consumer do
   let(:tuple)      { { value: "Hi!", topic: "foo", key: "foo", offset: 100 } }
   let(:message)    { double :message, tuple }
 
-  describe ".new" do
-    subject { consumer }
+  subject { described_class.new options }
 
+  describe ".new" do
     it { is_expected.to be_kind_of Enumerable }
   end
 

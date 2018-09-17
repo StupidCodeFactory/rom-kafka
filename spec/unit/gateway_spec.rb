@@ -1,124 +1,39 @@
 describe ROM::Kafka::Gateway do
 
-  let(:gateway) { described_class.new(client_id: :foo) }
+  subject { described_class.new(['kafka:9092']) }
 
   describe ".new" do
-    context "without client id" do
-      subject { gateway }
+    context "with brokers URLs" do
 
       it { is_expected.to be_kind_of ROM::Gateway }
     end
 
-    context "without client id" do
-      subject { described_class.new }
+    context "without brokers URLs" do
 
       it "fails" do
-        expect { subject }.to raise_error ArgumentError
+        expect { described_class.new }.to raise_error ArgumentError
       end
-    end
-  end
-
-  describe "#brokers" do
-    subject { gateway.brokers }
-
-    let(:brokers) { %w(localhost:9092 127.0.0.1:9092) }
-
-    context "from strings" do
-      let(:gateway) { described_class.new(*brokers, client_id: :foo) }
-
-      it { is_expected.to eql brokers }
-    end
-
-    context "from hosts and port options" do
-      let(:gateway) do
-        described_class
-          .new(client_id: :foo, hosts: %w(localhost 127.0.0.1), port: 9092)
-      end
-
-      it { is_expected.to eql brokers }
-    end
-
-    context "from mixed options" do
-      let(:gateway) do
-        described_class
-          .new("localhost", client_id: :foo, hosts: %w(127.0.0.1), port: 9092)
-      end
-
-      it { is_expected.to eql brokers }
-    end
-  end
-
-  describe "#attributes" do
-    subject { gateway.attributes }
-
-    context "by default" do
-      let(:attributes) { { client_id: :foo } }
-
-      it "is set" do
-        expect(subject).to eql(
-          ack_timeout_ms: 1_500,
-          brokers: ["localhost:9092"],
-          client_id: "foo",
-          compression_codec: nil,
-          max_bytes: 1_048_576,
-          max_send_retries: 3,
-          max_wait_ms: 100,
-          metadata_refresh_interval_ms: 600_000,
-          min_bytes: 1,
-          partitioner: nil,
-          required_acks: 0,
-          retry_backoff_ms: 100,
-          socket_timeout_ms: 10_000
-        )
-      end
-    end
-
-    context "when assigned" do
-      let(:gateway) { described_class.new(attributes) }
-
-      let(:attributes) do
-        {
-          ack_timeout_ms: 200,
-          brokers: ["localhost:9092"],
-          client_id: "foo",
-          compression_codec: :gzip,
-          max_bytes: 2_048,
-          max_send_retries: 2,
-          max_wait_ms: 300,
-          metadata_refresh_interval_ms: 300_000,
-          min_bytes: 1_024,
-          partitioner: proc { |value, count| value % count },
-          required_acks: 1,
-          retry_backoff_ms: 200,
-          socket_timeout_ms: 20_000
-        }
-      end
-
-      it { is_expected.to eql attributes }
     end
   end
 
   describe "#[]" do
-    subject { gateway[:foo] }
 
-    it { is_expected.to eql(nil) }
+    it { expect(subject[:foo]).to eql(nil) }
   end
 
   describe "#dataset?" do
     before do
-      allow(gateway).to receive(:[]) { |name| { foo: :FOO }[name.to_sym] }
+      allow(subject).to receive(:[]) { |name| { foo: :FOO }[name.to_sym] }
     end
 
     context "when dataset is registered" do
-      subject { gateway.dataset? "foo" }
 
-      it { is_expected.to eql true }
+      it { is_expected.to be_a_dataset :foo }
     end
 
     context "when dataset isn't registered" do
-      subject { gateway.dataset? "bar" }
 
-      it { is_expected.to eql false }
+      it { is_expected.to_not be_a_dataset :bar }
     end
   end
 
