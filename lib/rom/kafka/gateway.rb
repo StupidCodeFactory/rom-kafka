@@ -15,7 +15,7 @@ module ROM::Kafka
   class Gateway < ROM::Gateway
     attr_accessor :connection, :datasets
 
-    def initialize(addresses, **options) # @todo: refactor the fat initializer
+    def initialize(addresses, options: {}) # @todo: refactor the fat initializer
       self.connection = Kafka.new(addresses, options)
       self.datasets = Concurrent::Map.new
     end

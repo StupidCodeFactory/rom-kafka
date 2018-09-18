@@ -9,6 +9,6 @@ RSpec.shared_examples 'container' do
   end
 
   let(:container)     do
-    ROM.container configuration
+    ROM.container(configuration)
   end
 end

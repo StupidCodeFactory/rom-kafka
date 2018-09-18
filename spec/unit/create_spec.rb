@@ -3,20 +3,37 @@ require 'spec_helper'
 RSpec.describe ROM::Kafka::Commands::Create do
 
   include_context 'container'
+  include_context 'users and tasks'
 
   before do
-    configuration.relation(:users)
-    configuration.commands(:users) do
-      define :create
+    configuration.relation(:users) do
+      schema(infer: true)
     end
+
+    Test = Module.new
+
+    class Test::CreateUser < ROM::Commands::Create[:kafka]
+      relation :users
+      register_as :create
+      result :one
+    end
+
+    class Test::User < Class.new(Dry::Struct)
+      attribute :name, ROM::Types::String
+      attribute :age, ROM::Types::Int
+    end
+
+    configuration.register_command Test::CreateUser
   end
 
-  include_context 'users and tasks'
   subject do
-    described_class.new(users_relation)
+    container.commands.users.create
+    # described_class.new(users_relation, type: :create)
+
   end
+
   it 'does something' do
-    expect { subject }.to_not raise_error
+    expect { subject.call(name: 'Ja', age: 'asd') }.to_not raise_error
   end
 
 
